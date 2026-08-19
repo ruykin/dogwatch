@@ -36,7 +36,7 @@ pub struct HarnessEvent {
     /// Event kind: `session_start`, `prompt`, `agent_message`,
     /// `agent_thinking`, `tool_call`, `tool_result`, `permission_request`,
     /// `permission_decision`, `usage`, `artifact`, `session_end`,
-    /// `system_notification`, `agent_error`, `events_dropped`.
+    /// `session_pause`, `system_notification`, `agent_error`, `events_dropped`.
     pub kind: String,
     pub payload: Value,
 }
