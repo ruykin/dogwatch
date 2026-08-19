@@ -1,6 +1,6 @@
 # Agent Harness Architecture
 
-**Status:** Draft v0.1 · 2026-08-19
+**Status:** v0 implemented · 2026-08-19 (see §9 for status per workstream)
 **Base:** fork of [`aaif-goose/goose`](https://github.com/aaif-goose/goose) at v1.47.0 (`9f941fbfc`)
 
 ---
@@ -204,7 +204,44 @@ Exam and org differ **only** in profile content and control-plane behavior. Noth
 4. **Redaction** — org profiles will want secret-scrubbing before events leave the machine. Likely a sink-side filter stage; needs design.
 5. **Multi-agent parity** — claude-acp first; codex/gemini adapters after the event schema stabilizes, verifying each surfaces tool calls and permission requests with comparable fidelity.
 
-## 9. Glossary
+## 9. Implementation status (v0)
+
+Implemented in `crates/goose/src/harness/` plus `crates/goose-cli/src/commands/harness.rs`:
+
+| Workstream | Status | Where |
+|---|---|---|
+| Ingest sink — JSONL always-on + batched/retried HTTP ingest, non-blocking pump | ✅ | `harness/sink.rs` |
+| Event schema — envelope + per-content-block derivation, payload caps | ✅ | `harness/events.rs` |
+| Tap — every persisted message + usage metrics, both paths | ✅ | `session/session_manager.rs` (`add_message`, `record_usage_metrics`) |
+| Session identity — `harness_session_id` + principal on every event; context at `.goose-harness/session.json`, discovered via `GOOSE_HARNESS_CONTEXT` or ancestor walk | ✅ | `harness/mod.rs` |
+| Policy, native path — `HarnessPolicyInspector` (runs first in the inspector pipeline) | ✅ | `harness/policy.rs`, registered in `agents/agent.rs` |
+| Policy, ACP path — deny / force-approval in the permission-request handler + `permission_decision` events for mode and user decisions | ✅ | `acp/provider.rs` |
+| Bootstrap — `goose harness start` (profile fetch, workspace clone, locked config, child session launch), `submit` (diff artifact + session end), `status` | ✅ | `goose-cli/commands/harness.rs` |
+| Config lockdown | ✅ v0 (profile `config_locked` applied as process env, which tops goose's config precedence and is inherited by the session child process) | `commands/harness.rs` |
+| Profiles | ✅ (YAML from path or URL; examples in `examples/harness-profiles/`) | `harness/profile.rs` |
+
+### Usage
+
+```bash
+# Exam candidate
+goose harness start --profile https://exam.example.com/profiles/backend-q3 \
+  --principal candidate@example.com --token <session-token>
+# … work in the launched session; everything streams to ingest + .goose-harness/events.jsonl
+goose harness submit
+
+# Org / local trial
+goose harness start --profile examples/harness-profiles/org-default.yaml
+goose harness status
+```
+
+### v0 limitations
+
+- Config lockdown is env-based: it binds goose invocations launched under `harness start` (and any process given `GOOSE_HARNESS_CONTEXT`), but a user running plain `goose` in the workspace gets event capture (context discovery) without the locked env. A config-layer lock is the follow-up.
+- `submit` captures `git diff <base_commit>` plus an untracked-file listing; untracked file *contents* are not yet included.
+- Remote ingest buffer is bounded (10k events) with drop-oldest under sustained outage; the local JSONL log is never dropped.
+- ACP policy matches on permission-request titles (ACP doesn't expose goose tool names); title patterns are honest-agent enforcement, not a security boundary — consistent with the observe-don't-enforce trust model (§2).
+
+## 10. Glossary
 
 | Term | Meaning |
 |---|---|
