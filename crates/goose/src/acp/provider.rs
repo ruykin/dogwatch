@@ -766,12 +766,58 @@ impl Provider for AcpProvider {
                     AcpUpdate::PermissionRequest { request, response_tx } => {
                         text_run = None;
                         thought_run = None;
-                        if let Some(decision) = permission_decision_from_mode(goose_mode) {
-                            if decision.should_record_rejection() {
-                                rejected_tool_calls.insert(request.tool_call.tool_call_id.0.to_string());
-                            }
-                            let _ = response_tx.send(map_permission_response(&request, decision));
+
+                        // Harness policy check. Externally executed tools never
+                        // reach the ToolInspector pipeline, so this permission
+                        // request is the enforcement chokepoint on the ACP path.
+                        // Policy consults the request title (ACP agents don't
+                        // expose goose tool names). Deny short-circuits; a
+                        // require-approval match suppresses full-auto so the
+                        // request falls through to human confirmation below.
+                        let policy_subject = request
+                            .tool_call
+                            .fields
+                            .title
+                            .clone()
+                            .unwrap_or_else(|| "Tool".to_string());
+                        let policy_verdict = crate::harness::active()
+                            .map(|h| h.policy().check(&policy_subject))
+                            .unwrap_or(crate::harness::policy::PolicyVerdict::Allow);
+
+                        if let crate::harness::policy::PolicyVerdict::Deny(reason) = &policy_verdict {
+                            crate::harness::record_permission_decision(
+                                None,
+                                &policy_subject,
+                                "policy_deny",
+                                "acp",
+                            );
+                            tracing::info!("harness: denied ACP tool call ({reason})");
+                            rejected_tool_calls.insert(request.tool_call.tool_call_id.0.to_string());
+                            let _ = response_tx.send(map_permission_response(
+                                &request,
+                                PermissionDecision::RejectOnce,
+                            ));
                             continue;
+                        }
+
+                        let force_approval = matches!(
+                            policy_verdict,
+                            crate::harness::policy::PolicyVerdict::RequireApproval(_)
+                        );
+                        if !force_approval {
+                            if let Some(decision) = permission_decision_from_mode(goose_mode) {
+                                if decision.should_record_rejection() {
+                                    rejected_tool_calls.insert(request.tool_call.tool_call_id.0.to_string());
+                                }
+                                crate::harness::record_permission_decision(
+                                    None,
+                                    &policy_subject,
+                                    if decision.should_record_rejection() { "mode_reject" } else { "mode_allow" },
+                                    "acp",
+                                );
+                                let _ = response_tx.send(map_permission_response(&request, decision));
+                                continue;
+                            }
                         }
 
                         let request_id = request.tool_call.tool_call_id.0.to_string();
@@ -797,6 +843,12 @@ impl Provider for AcpProvider {
                         if decision.should_record_rejection() {
                             rejected_tool_calls.insert(request.tool_call.tool_call_id.0.to_string());
                         }
+                        crate::harness::record_permission_decision(
+                            None,
+                            &policy_subject,
+                            if decision.should_record_rejection() { "user_reject" } else { "user_allow" },
+                            "acp",
+                        );
                         let _ = response_tx.send(map_permission_response(&request, decision));
                     }
                     AcpUpdate::Complete(reason, usage) => {

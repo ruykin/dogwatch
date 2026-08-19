@@ -722,6 +722,12 @@ impl Agent {
     ) -> ToolInspectionManager {
         let mut tool_inspection_manager = ToolInspectionManager::new();
 
+        // Harness policy runs first: profile deny/require-approval rules are
+        // authoritative when a harness session is active (no-op otherwise).
+        tool_inspection_manager.add_inspector(Box::new(
+            crate::harness::policy::HarnessPolicyInspector,
+        ));
+
         // Add security inspector (highest priority - runs first)
         tool_inspection_manager.add_inspector(Box::new(SecurityInspector::new()));
         tool_inspection_manager.add_inspector(Box::new(EgressInspector::new()));

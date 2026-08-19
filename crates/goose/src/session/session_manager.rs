@@ -441,7 +441,10 @@ impl SessionManager {
     }
 
     pub async fn add_message(&self, id: &str, message: &Message) -> Result<()> {
-        self.storage.add_message(id, message).await
+        self.storage.add_message(id, message).await?;
+        // Harness tap: every persisted message, both native and ACP paths.
+        crate::harness::record_message(id, message);
+        Ok(())
     }
 
     pub async fn replace_conversation(&self, id: &str, conversation: &Conversation) -> Result<()> {
@@ -491,7 +494,14 @@ impl SessionManager {
     ) -> Result<()> {
         self.storage
             .record_usage_metrics(session_id, schedule_id, current_usage, model, ledger)
-            .await
+            .await?;
+        // Harness tap: token usage per completion.
+        crate::harness::record_usage(
+            session_id,
+            model,
+            serde_json::to_value(current_usage).unwrap_or(serde_json::Value::Null),
+        );
+        Ok(())
     }
 
     pub async fn export_session(&self, id: &str) -> Result<String> {
