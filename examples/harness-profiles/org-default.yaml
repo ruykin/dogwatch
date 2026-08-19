@@ -1,0 +1,16 @@
+# Org-wide harness profile: no workspace bootstrap, telemetry + policy only.
+#   goose harness start --profile https://harness.corp.example.com/profiles/default \
+#     --principal "$USER@corp.example.com"
+id: org/default
+description: Org harness — usage telemetry and tool policy
+
+ingest:
+  endpoint: https://harness.corp.example.com/v1/events
+
+policy:
+  deny:
+    - "*drop table*"
+  require_approval:
+    - "developer__shell"
+
+config_locked: {}

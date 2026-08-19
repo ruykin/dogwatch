@@ -803,6 +803,13 @@ enum Command {
     #[command(about = "Configure goose settings")]
     Configure {},
 
+    /// Harness-managed sessions (identity, event streaming, policy)
+    #[command(about = "Start, submit, and inspect harness-managed sessions")]
+    Harness {
+        #[command(subcommand)]
+        command: crate::commands::harness::HarnessCommand,
+    },
+
     /// Display goose configuration information
     #[command(about = "Display goose information")]
     Info {
@@ -1344,6 +1351,7 @@ fn get_command_name(command: &Option<Command>) -> &'static str {
         Some(Command::Session { .. }) => "session",
         Some(Command::Run { .. }) => "run",
         Some(Command::Gateway { .. }) => "gateway",
+        Some(Command::Harness { .. }) => "harness",
         Some(Command::Schedule { .. }) => "schedule",
         #[cfg(feature = "update")]
         Some(Command::Update { .. }) => "update",
@@ -2324,6 +2332,9 @@ pub async fn cli() -> anyhow::Result<()> {
                 model_opts,
             )
             .await
+        }
+        Some(Command::Harness { command }) => {
+            crate::commands::harness::handle_harness_command(command).await
         }
         Some(Command::Gateway { command }) => handle_gateway_command(command).await,
         Some(Command::Schedule { command }) => handle_schedule_command(command).await,

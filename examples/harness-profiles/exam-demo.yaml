@@ -1,0 +1,25 @@
+# Demo exam profile. Start with:
+#   goose harness start --profile examples/harness-profiles/exam-demo.yaml \
+#     --principal candidate@example.com --token <session-token>
+id: exam/demo
+description: Demo take-home exercise with full event capture
+
+# Events stream here in real time (local .goose-harness/events.jsonl is
+# always written regardless). The --token flag fills `token` when omitted.
+ingest:
+  endpoint: https://ingest.example.com/v1/events
+
+policy:
+  deny:
+    - "*production*"
+  require_approval: []
+
+# Pinned for the session: applied as process env, which tops goose's config
+# precedence. `approve` mode makes the external agent ask before each tool
+# use, which is what generates the permission-decision record.
+config_locked:
+  GOOSE_MODE: approve
+
+workspace:
+  repo: https://github.com/example/exercise.git
+  dir: exercise

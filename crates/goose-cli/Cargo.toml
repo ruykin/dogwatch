@@ -32,6 +32,7 @@ dotenvy = { workspace = true }
 bat = { version = "0.26", default-features = false, features = ["regex-onig"] }
 anyhow = { workspace = true }
 serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v7"] }
 tokio = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true }

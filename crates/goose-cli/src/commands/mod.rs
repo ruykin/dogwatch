@@ -1,6 +1,7 @@
 pub mod configure;
 pub mod doctor;
 pub mod gateway;
+pub mod harness;
 pub mod info;
 pub mod plugin;
 pub mod recipe;
