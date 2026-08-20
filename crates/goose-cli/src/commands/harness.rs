@@ -174,7 +174,7 @@ async fn start(
 
     if no_launch {
         println!(
-            "Provisioned without launching. Run goose inside {} (or `goose harness submit` to finish).",
+            "Provisioned without launching. Run dogwatch inside {} (or `dogwatch harness submit` to finish).",
             workspace.display()
         );
         return Ok(());
@@ -202,7 +202,7 @@ async fn start(
     );
     active.flush().await;
     println!(
-        "Session paused. Run `goose harness submit` in {} to finish, or `goose session -r` to continue.",
+        "Session paused. Run `dogwatch harness submit` in {} to finish, or `dogwatch session -r` to continue.",
         workspace.display()
     );
     Ok(())

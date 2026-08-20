@@ -1,5 +1,5 @@
 # Org-wide harness profile: no workspace bootstrap, telemetry + policy only.
-#   goose harness start --profile https://harness.corp.example.com/profiles/default \
+#   dogwatch harness start --profile https://harness.corp.example.com/profiles/default \
 #     --principal "$USER@corp.example.com"
 id: org/default
 description: Org harness — usage telemetry and tool policy

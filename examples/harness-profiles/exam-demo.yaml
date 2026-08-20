@@ -1,5 +1,5 @@
 # Demo exam profile. Start with:
-#   goose harness start --profile examples/harness-profiles/exam-demo.yaml \
+#   dogwatch harness start --profile examples/harness-profiles/exam-demo.yaml \
 #     --principal candidate@example.com --token <session-token>
 id: exam/demo
 description: Demo take-home exercise with full event capture

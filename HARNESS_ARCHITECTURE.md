@@ -2,6 +2,7 @@
 
 **Status:** v0 implemented · 2026-08-19 (see §9 for status per workstream)
 **Base:** fork of [`aaif-goose/goose`](https://github.com/aaif-goose/goose) at v1.47.0 (`9f941fbfc`)
+**CLI:** the binary ships as **`dogwatch`** (nautical: a short observation watch). Crate/module names keep goose's to minimize upstream-merge friction; only the emitted binary and user-facing strings are branded.
 
 ---
 
@@ -64,7 +65,7 @@ flowchart LR
         INGEST["event ingest API"]
         OTLP["OTLP collector<br/>(optional)"]
     end
-    PROFILE -- "bootstrap: goose harness start &lt;token&gt;" --> CORE
+    PROFILE -- "bootstrap: dogwatch harness start &lt;token&gt;" --> CORE
     CORE -- "normalized event stream (real time)" --> INGEST
     CORE -. "spans / logs / metrics" .-> OTLP
 ```
@@ -161,14 +162,14 @@ trait EventSink {
 
 ### 6.4 Bootstrap command
 
-`goose harness start <token-or-profile>`:
+`dogwatch harness start <token-or-profile>`:
 
 1. Resolve token → fetch profile from control plane (recipe + plugin pack + config layer + sink endpoints)
 2. Materialize workspace (exam: clone the exercise repo; org: no-op)
 3. Mint `harness_session_id`, emit `session_start`
 4. Launch the session with the profile's recipe
 
-Exam mode adds `goose harness submit`: final `git diff`/archive shipped as an `artifact` event, then `session_end`. The recipe/plugin mechanisms mean most of this is assembly, not new machinery.
+Exam mode adds `dogwatch harness submit`: final `git diff`/archive shipped as an `artifact` event, then `session_end`. The recipe/plugin mechanisms mean most of this is assembly, not new machinery.
 
 ### 6.5 Config lockdown
 
@@ -216,7 +217,7 @@ Implemented in `crates/goose/src/harness/` plus `crates/goose-cli/src/commands/h
 | Session identity — `harness_session_id` + principal on every event; context at `.goose-harness/session.json`, discovered via `GOOSE_HARNESS_CONTEXT` or ancestor walk | ✅ | `harness/mod.rs` |
 | Policy, native path — `HarnessPolicyInspector` (runs first in the inspector pipeline) | ✅ | `harness/policy.rs`, registered in `agents/agent.rs` |
 | Policy, ACP path — deny / force-approval in the permission-request handler + `permission_decision` events for mode and user decisions | ✅ | `acp/provider.rs` |
-| Bootstrap — `goose harness start` (profile fetch, workspace clone, locked config, child session launch), `submit` (diff artifact + session end), `status` | ✅ | `goose-cli/commands/harness.rs` |
+| Bootstrap — `dogwatch harness start` (profile fetch, workspace clone, locked config, child session launch), `submit` (diff artifact + session end), `status` | ✅ | `goose-cli/commands/harness.rs` |
 | Config lockdown | ✅ v0 (profile `config_locked` applied as process env, which tops goose's config precedence and is inherited by the session child process) | `commands/harness.rs` |
 | Profiles | ✅ (YAML from path or URL; examples in `examples/harness-profiles/`) | `harness/profile.rs` |
 
@@ -224,14 +225,14 @@ Implemented in `crates/goose/src/harness/` plus `crates/goose-cli/src/commands/h
 
 ```bash
 # Exam candidate
-goose harness start --profile https://exam.example.com/profiles/backend-q3 \
+dogwatch harness start --profile https://exam.example.com/profiles/backend-q3 \
   --principal candidate@example.com --token <session-token>
 # … work in the launched session; everything streams to ingest + .goose-harness/events.jsonl
-goose harness submit
+dogwatch harness submit
 
 # Org / local trial
-goose harness start --profile examples/harness-profiles/org-default.yaml
-goose harness status
+dogwatch harness start --profile examples/harness-profiles/org-default.yaml
+dogwatch harness status
 ```
 
 ### v0 limitations
