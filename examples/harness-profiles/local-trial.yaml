@@ -1,0 +1,7 @@
+# Minimal local trial: no ingest endpoint, no workspace clone — events go to
+# ./.goose-harness/events.jsonl in the directory where you run start.
+#   dogwatch harness start --profile examples/harness-profiles/local-trial.yaml
+id: trial/local
+description: Local trial — JSONL event capture only
+policy:
+  require_approval: []
