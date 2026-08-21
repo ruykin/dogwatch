@@ -132,7 +132,7 @@ pub struct SessionOptions {
         long = "container",
         value_name = "CONTAINER_ID",
         help = "Docker container ID to run extensions inside",
-        long_help = "Run extensions (stdio and built-in) inside the specified container. The extension must exist in the container. For built-in extensions, goose must be installed inside the container."
+        long_help = "Run extensions (stdio and built-in) inside the specified container. The extension must exist in the container. For built-in extensions, dogwatch must be installed inside the container."
     )]
     pub container: Option<String>,
 }
@@ -195,7 +195,7 @@ pub struct ExtensionOptions {
         long = "with-builtin",
         value_name = "NAME",
         help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
-        long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+        long_help = "Add one or more builtin extensions that are bundled with dogwatch by specifying their names, comma-separated",
         value_delimiter = ','
     )]
     pub builtins: Vec<String>,
@@ -226,8 +226,8 @@ pub struct InputOptions {
         short = 't',
         long = "text",
         value_name = "TEXT",
-        help = "Input text to provide to goose directly",
-        long_help = "Input text containing commands for goose. Use this in lieu of the instructions argument.",
+        help = "Input text to provide to dogwatch directly",
+        long_help = "Input text containing commands for dogwatch. Use this in lieu of the instructions argument.",
         conflicts_with = "instructions",
         conflicts_with = "recipe"
     )]
@@ -586,7 +586,7 @@ enum SessionCommand {
     )]
     Import {
         #[arg(
-            help = "Path to a goose session export, a Claude Code, Codex, or Pi .jsonl transcript, or a goose://sessions/nostr share link"
+            help = "Path to a dogwatch session export, a Claude Code, Codex, or Pi .jsonl transcript, or a goose://sessions/nostr share link"
         )]
         input: String,
 
@@ -726,8 +726,8 @@ enum PluginCommand {
 
 #[derive(Subcommand)]
 enum SkillsCommand {
-    /// List all skills available to the goose agent
-    #[command(about = "List all skills available to the goose agent")]
+    /// List all skills available to the dogwatch agent
+    #[command(about = "List all skills available to the dogwatch agent")]
     List,
 }
 
@@ -800,7 +800,7 @@ enum RecipeCommand {
 #[derive(Subcommand)]
 enum Command {
     /// Configure goose settings
-    #[command(about = "Configure goose settings")]
+    #[command(about = "Configure dogwatch settings")]
     Configure {},
 
     /// Harness-managed sessions (identity, event streaming, policy)
@@ -811,7 +811,7 @@ enum Command {
     },
 
     /// Display goose configuration information
-    #[command(about = "Display goose information")]
+    #[command(about = "Display dogwatch information")]
     Info {
         /// Show verbose information including current configuration
         #[arg(short, long, help = "Show verbose information including config.yaml")]
@@ -824,21 +824,21 @@ enum Command {
     Doctor {},
 
     /// Manage system prompts and behaviors
-    #[command(about = "Run one of the mcp servers bundled with goose")]
+    #[command(about = "Run one of the mcp servers bundled with dogwatch")]
     Mcp {
         #[arg(value_parser = clap::value_parser!(McpCommand))]
         server: McpCommand,
     },
 
     /// Run goose as an ACP (Agent Client Protocol) agent
-    #[command(about = "Run goose as an ACP agent server on stdio")]
+    #[command(about = "Run dogwatch as an ACP agent server on stdio")]
     Acp {
         /// Add builtin extensions by name
         #[arg(
             long = "with-builtin",
             value_name = "NAME",
             help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
-            long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+            long_help = "Add one or more builtin extensions that are bundled with dogwatch by specifying their names, comma-separated",
             value_delimiter = ','
         )]
         builtins: Vec<String>,
@@ -872,7 +872,7 @@ enum Command {
             long = "with-builtin",
             value_name = "NAME",
             help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
-            long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+            long_help = "Add one or more builtin extensions that are bundled with dogwatch by specifying their names, comma-separated",
             value_delimiter = ',',
             action = clap::ArgAction::Append
         )]
@@ -1018,14 +1018,14 @@ enum Command {
 
     /// Update the goose CLI version
     #[cfg(feature = "update")]
-    #[command(about = "Update the goose CLI version")]
+    #[command(about = "Update the dogwatch CLI version")]
     Update {
         /// Update to canary version
         #[arg(
             short,
             long,
             help = "Update to canary version",
-            long_help = "Update to the latest canary version of the goose CLI, otherwise updates to the latest stable version."
+            long_help = "Update to the latest canary version of the dogwatch CLI, otherwise updates to the latest stable version."
         )]
         canary: bool,
 
