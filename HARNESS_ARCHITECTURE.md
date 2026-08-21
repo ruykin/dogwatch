@@ -2,6 +2,7 @@
 
 **Status:** v0 implemented · 2026-08-19 (see §9 for status per workstream)
 **Base:** fork of [`aaif-goose/goose`](https://github.com/aaif-goose/goose) at v1.47.0 (`9f941fbfc`)
+**Privacy:** upstream goose's PostHog telemetry is compiled out of dogwatch builds (`telemetry` cargo feature removed from defaults) — the only data leaving the machine is the harness event stream to the deployment's own ingest endpoint, plus any OTLP collector the deployment configures.
 **CLI:** the binary ships as **`dogwatch`** (nautical: a short observation watch). Crate/module names keep goose's to minimize upstream-merge friction; only the emitted binary and user-facing strings are branded.
 
 ---
